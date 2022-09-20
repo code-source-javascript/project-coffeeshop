@@ -92,9 +92,11 @@ def create_drink():
         drink = Drink(title=title, recipe=recipe)
         drink.insert()
 
+        drinks = drink.long()
+
         return jsonify({
             'success': True,
-            'drinks': drink
+            'drinks': drinks
         })
 
     except Exception as e:
@@ -128,10 +130,11 @@ def update_drink(drink_id):
             drink.recipe = recipe
 
         drink.update()
+        drinks = drink.long()
 
         return jsonify({
             'success': True,
-            'drinks': drink
+            'drinks': drinks
         })
 
     except Exception as e:
@@ -224,3 +227,33 @@ def authError(error):
         "error": jsonify(error),
         "message": "Authentication Error"
     }), AuthError
+
+
+@app.errorhandler(400)
+def notfound(error):
+    print(error)
+    return jsonify({
+        "success": False,
+        "error": 400,
+        "message": "Bad Request"
+    }), 400
+
+
+@app.errorhandler(401)
+def notfound(error):
+    print(error)
+    return jsonify({
+        "success": False,
+        "error": 401,
+        "message": "Unauthorized"
+    }), 401
+
+
+@app.errorhandler(500)
+def notfound(error):
+    print(error)
+    return jsonify({
+        "success": False,
+        "error": 500,
+        "message": "Internal Server Error"
+    }), 500
