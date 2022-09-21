@@ -150,6 +150,7 @@ def verify_decode_jwt(token):
                 401)
 
 
+
 '''
 @TODO implement @requires_auth(permission) decorator method
     @INPUTS

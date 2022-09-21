@@ -58,7 +58,7 @@ def get_drinks():
 
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
-def get_drink_details():
+def get_drink_details(payload):
     try:
         drink = Drink.query.order_by('id').all()
         drinks = [data.long() for data in drink]
@@ -83,20 +83,19 @@ def get_drink_details():
 
 @app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
-def create_drink():
+def create_drink(payload):
     try:
         body = request.get_json()
+        print(body)
         title = body.get('title', None)
         recipe = body.get('recipe', None)
 
         drink = Drink(title=title, recipe=recipe)
         drink.insert()
 
-        drinks = drink.long()
-
         return jsonify({
             'success': True,
-            'drinks': drinks
+            'drinks': drink
         })
 
     except Exception as e:
@@ -118,10 +117,12 @@ def create_drink():
 
 @app.route('/drinks/<int:drink_id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
-def update_drink(drink_id):
+def update_drink(payload, drink_id):
     try:
         body = request.get_json()
         drink = Drink.query.get(drink_id)
+        if not drink:
+            abort(404)
         title = body.get('title', None)
         recipe = body.get('recipe', None)
         if title:
@@ -130,11 +131,10 @@ def update_drink(drink_id):
             drink.recipe = recipe
 
         drink.update()
-        drinks = drink.long()
 
         return jsonify({
             'success': True,
-            'drinks': drinks
+            'drinks': drink
         })
 
     except Exception as e:
@@ -155,7 +155,7 @@ def update_drink(drink_id):
 
 @app.route('/drinks/<int:drink_id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
-def delete_drink(drink_id):
+def delete_drink(payload, drink_id):
     try:
         drink = Drink.query.get(drink_id)
         if not drink:
@@ -237,6 +237,16 @@ def notfound(error):
         "error": 400,
         "message": "Bad Request"
     }), 400
+
+
+@app.errorhandler(405)
+def notfound(error):
+    print(error)
+    return jsonify({
+        "success": False,
+        "error": 405,
+        "message": "Method Not Allowed"
+    }), 405
 
 
 @app.errorhandler(401)
